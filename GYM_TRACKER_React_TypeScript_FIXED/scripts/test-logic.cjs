@@ -1,0 +1,57 @@
+// Built-in Node assertions for critical domain logic; run `npm test` after npm install.
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const Module=require('node:module');
+const ts=require('typescript');
+const root=path.resolve(__dirname,'../src/lib');
+function loadTs(filename,mocks={}) {
+  const file=path.join(root,filename+'.ts');
+  const code=ts.transpileModule(fs.readFileSync(file,'utf8'),{fileName:file,compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
+  const moduleInstance=new Module(file,module);
+  moduleInstance.filename=file;
+  moduleInstance.paths=Module._nodeModulePaths(root);
+  const standardRequire=moduleInstance.require.bind(moduleInstance);
+  moduleInstance.require=(id)=>mocks[id]??standardRequire(id);
+  moduleInstance._compile(code,file);
+  return moduleInstance.exports;
+}
+const logic=loadTs('defaults');
+const storage=loadTs('storage',{'./defaults':logic});
+const {DEFAULT_PLAN,createWorkout,volume,completion,nearDay,uuid,suggestedIncrease,completedSets}=logic;
+assert.equal(DEFAULT_PLAN.length,3);
+assert.deepEqual(DEFAULT_PLAN.map(d=>d.weekday),[1,3,5]);
+assert.deepEqual(DEFAULT_PLAN.map(d=>d.exercises.length),[6,7,6]);
+assert.deepEqual(DEFAULT_PLAN.map(d=>d.exercises.reduce((n,e)=>n+e.sets,0)),[16,19,17]);
+assert.equal(DEFAULT_PLAN[0].exercises[0].id,'bench');
+assert.equal(DEFAULT_PLAN[0].exercises[0].name,'Жим штанги лежа');
+assert.equal(DEFAULT_PLAN.flatMap(d=>d.exercises).some(e=>/обратная бабочка|задняя дельта/i.test(e.name)),false);
+const monday=new Date(2026,10,2,15);
+assert.equal(nearDay(DEFAULT_PLAN,[],monday).day.id,'mon');
+const initial=createWorkout(DEFAULT_PLAN[0],[]);
+assert.equal(initial.exercises.length,6);
+assert.equal(initial.exercises[0].sets.length,3);
+assert.equal(completion(initial),0);
+assert.equal(volume(initial),0);
+initial.exercises[0].sets[0]={id:uuid(),weight:'62,5',reps:'10',done:true,goodForm:true};
+assert.equal(volume(initial),625);
+assert.equal(completedSets(initial).length,1);
+assert.equal(completion(initial),6);
+for(const row of initial.exercises[0].sets){row.weight='70';row.reps='10';row.done=true;row.goodForm=true;}
+assert.equal(suggestedIncrease(initial.exercises[0]),72.5);
+initial.exercises[0].sets[1].goodForm=false;
+assert.equal(suggestedIncrease(initial.exercises[0]),null);
+initial.startedAt=monday.toISOString();
+initial.completedAt=new Date(monday.getTime()+90*60000).toISOString();
+const later=createWorkout(DEFAULT_PLAN[0],[initial]);
+assert.equal(later.exercises[0].sets[0].weight,'70');
+assert.equal(later.exercises[0].sets[1].weight,'70');
+assert.equal(later.exercises[0].sets[0].reps,'');
+assert.equal(nearDay(DEFAULT_PLAN,[initial],monday).day.id,'wed');
+const app={version:1,plan:DEFAULT_PLAN,history:[initial],active:later,theme:'dark'};
+assert.ok(storage.validateData(app));
+const csv=storage.toCSV(app);
+assert.ok(csv.includes('Жим штанги лежа'));
+assert.ok(csv.includes('Вес (кг)'));
+assert.ok(csv.includes('70'));
+console.log('✓ Программа, порядок упражнений, расчеты, автоподстановка, прогресс, CSV, проверка JSON — OK');

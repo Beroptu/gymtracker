@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root { --bg:245 247 251; --surface:255 255 255; --raised:239 243 249; --line:224 230 241; --muted:112 125 147; --fg:23 31 49; }
+:root.dark { --bg:9 12 19; --surface:19 24 34; --raised:29 36 48; --line:42 50 65; --muted:145 156 174; --fg:245 248 255; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:rgb(var(--bg)); color:rgb(var(--fg)); font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; -webkit-font-smoothing:antialiased; }
+button, input, textarea { font:inherit; }
+button { cursor:pointer; }
+::selection { background:rgba(67,133,255,.36); }
+::-webkit-scrollbar { width:7px; height:7px; } ::-webkit-scrollbar-thumb { background:rgba(128,145,168,.25);border-radius:20px; }
+.safe-bottom { padding-bottom:calc(100px + env(safe-area-inset-bottom)); }
+.dark .hero-glow { background: radial-gradient(ellipse at 85% 0%,rgba(48,103,250,.35),transparent 54%),linear-gradient(135deg,#15294c 0%,#142138 51%,#171f2d 100%); }
+.hero-glow { background: radial-gradient(ellipse at 85% 0%,rgba(48,103,250,.22),transparent 55%),linear-gradient(135deg,#dceaff,#e9f0ff 60%,#f0f6ff); }
+.progress-track { background:rgb(var(--raised)); }
+.stat-gradient { background:linear-gradient(135deg,rgba(67,133,255,.19),rgba(67,133,255,.02)); }
+.frosted { background:rgb(var(--surface)/.92); backdrop-filter:blur(22px); }
+.chart-grid line { stroke:rgb(var(--line)); }
+.recharts-cartesian-axis-tick-value, .recharts-legend-item-text { fill:rgb(var(--muted)) !important; font-family:Inter,sans-serif; font-size:11px; }
+.recharts-tooltip-wrapper { outline:none !important; }
+.chart-tooltip { border:1px solid rgb(var(--line));background:rgb(var(--surface));color:rgb(var(--fg));border-radius:12px;padding:10px 13px;box-shadow:0 12px 30px rgba(0,0,0,.2);font-size:12px; }
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}input[type=number]{-moz-appearance:textfield}
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after {scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important;} }

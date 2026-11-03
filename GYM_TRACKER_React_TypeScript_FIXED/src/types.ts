@@ -1,0 +1,10 @@
+export type Muscle = 'Грудь' | 'Спина' | 'Плечи' | 'Бицепс' | 'Трицепс' | 'Ноги';
+export const MUSCLES: Muscle[] = ['Грудь', 'Спина', 'Плечи', 'Бицепс', 'Трицепс', 'Ноги'];
+export type WorkoutDayId = 'mon' | 'wed' | 'fri';
+export type Exercise = { id: string; name: string; sets: number; minReps: number; maxReps: number; muscle: Muscle; increment: number };
+export type TrainingDay = { id: WorkoutDayId; weekday: number; short: string; title: string; focus: string; exercises: Exercise[] };
+export type TrainingSet = { id: string; weight: string; reps: string; done: boolean; goodForm: boolean };
+export type LoggedExercise = { exerciseId: string; name: string; muscle: Muscle; minReps: number; maxReps: number; increment: number; sets: TrainingSet[] };
+export type Workout = { id: string; dayId: WorkoutDayId; title: string; startedAt: string; completedAt?: string; notes: string; exercises: LoggedExercise[]; restEndAt?: number; restSeconds: number };
+export type AppData = { version: 1; plan: TrainingDay[]; history: Workout[]; active: Workout | null; theme: 'dark' | 'light' };
+export type Screen = 'home' | 'workout' | 'history' | 'progress' | 'plan' | 'settings';
